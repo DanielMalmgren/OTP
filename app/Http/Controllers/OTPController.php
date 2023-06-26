@@ -30,6 +30,13 @@ class OTPController extends Controller
             'user' => $user,
         ];
 
+        try {
+            XPIController::ActivateOtp($request->username, $request->serial);
+        } catch(\Exception $e) {
+            logger($user.name.' caught exception: '.$e->getMessage());
+            return view('otp.failure')->with($data);
+        }
+
         return view('otp.success')->with($data);
     }
 
