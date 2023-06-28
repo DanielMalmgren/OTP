@@ -8,10 +8,10 @@
             <div class="card">
                 <div class="card-header">Aktivering lyckades</div>
                 <div class="card-body">
-                    <div id="feedback">
-                        Aktiveringen är genomförd,<br>
-                        OTP-dosan är nu färdig att använda.<br>
-                    </div>
+
+                    Aktiveringen är genomförd,<br>
+                    OTP-dosan är nu färdig att använda.<br>
+
                 </div>
             </div>
         </div>

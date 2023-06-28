@@ -18,3 +18,4 @@ use Illuminate\Support\Facades\Route;
 Route::get('/',                             'HomeController@index');
 
 Route::post('/otp/activate',                'OTPController@activate');
+Route::post('/otp/confirm',                 'OTPController@confirm');

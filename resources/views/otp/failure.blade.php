@@ -8,10 +8,16 @@
             <div class="card">
                 <div class="card-header">Aktivering misslyckades</div>
                 <div class="card-body">
-                    <div id="feedback">
-                        Någonting gick fel med aktiveringen,<br>
-                        vänligen kontakta Itsam Support.<br>
-                    </div>
+
+                    Någonting gick fel med aktiveringen,<br>
+                    vänligen kontakta Itsam Support.<br>
+
+                    @if(isset($error) && $error != '')
+                        <br>
+                        Felkod:<br>
+                        {{$error}}
+                    @endif
+
                 </div>
             </div>
         </div>
