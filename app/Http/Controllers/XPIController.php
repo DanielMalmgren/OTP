@@ -56,4 +56,36 @@ class XPIController extends Controller
         Soap::to(env("XPI_BASEURL").'OATH?wsdl')->
                 call('updateOATHProperties', ['subject' => $subject, 'oathProperties' => $oathproperties]);
     }
+
+    static public function DeactivateOtp(String $username, String $serial) {
+        $user = session()->get('user');
+
+        if($user) {
+            $opuser = $user->username;
+        } else {
+            $opuser = 'Local';
+        }
+
+        logger($opuser." is removing OTP device ".$serial." from user ".$username.".");
+
+        $usernamenode = ['key'=>'username','value'=>env("XPI_USERNAME")];
+        $passwordnode = ['key'=>'password','value'=>env("XPI_PASSWORD")];
+        $subject = ['credentials' => [$usernamenode, $passwordnode]];
+
+        $subject = Soap::to(env("XPI_BASEURL").'Authentication?wsdl')->
+                call('authenticate', ['subject' => $subject, 'method' => env("XPI_AUTHMETHOD")])->response->return;
+
+        $oathproperties = Soap::to(env("XPI_BASEURL").'OATH?wsdl')->
+                call('getOATHProperties', ['subject' => $subject, 'username' => $username])->response->return;
+
+        foreach($oathproperties->oathTokens as $key => $token) {
+            if($token->tokenId == $serial) {
+                unset($oathproperties->oathTokens[$key]);
+                break;
+            }
+        }
+
+        Soap::to(env("XPI_BASEURL").'OATH?wsdl')->
+                call('updateOATHProperties', ['subject' => $subject, 'oathProperties' => $oathproperties]);
+    }
 }
