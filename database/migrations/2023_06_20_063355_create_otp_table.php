@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('pin', 4);
             $table->string('puk', 6);
             $table->string('status', 10)->nullable();
+            $table->string('user', 12)->nullable();
         });
     }
 

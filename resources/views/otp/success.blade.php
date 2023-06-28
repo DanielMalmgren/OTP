@@ -10,7 +10,12 @@
                 <div class="card-body">
 
                     Aktiveringen är genomförd,<br>
-                    OTP-dosan är nu färdig att använda.<br>
+                    OTP-dosan är nu färdig att använda.<br><br>
+
+                    PIN-kod: {{$pin}}<br><br>
+
+                    OBS! PIN-koden ovan visas bara en gång!<br>
+                    Uppmana gärna användaren att testa OTP-dosan på direkten<br>
 
                 </div>
             </div>

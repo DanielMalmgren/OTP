@@ -17,15 +17,23 @@ class OTPImport implements ToModel
         $serial = $row[0];
         $pin = sprintf("%04d", $row[1]);
         $puk = sprintf("%06d",$row[2]);
+        $user = $row[3];
 
         if(strlen($serial) != 12 || strlen($pin) != 4 || strlen($puk) != 6) {
             return null;
         }
 
+        $status = null;
+        if(isset($user) && $user != '') {
+            $status = 'assigned';
+        }
+
         return new OTP([
-            'serial' => $row[0],
-            'pin'    => $row[1], 
-            'puk'    => $row[2], 
+            'serial' => $serial,
+            'pin'    => $pin,
+            'puk'    => $puk,
+            'status' => $status,
+            'user'   => $user,
         ]);
     }
 }

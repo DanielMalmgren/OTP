@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\OTP;
 
 class OTPController extends Controller
 {
@@ -58,9 +59,13 @@ class OTPController extends Controller
             return view('otp.failure')->with($data);
         }
 
+        $otp = OTP::where('serial', $request->serial)->first();
+        $otp->status = 'assigned';
+        $otp->user = $request->username;
+        $otp->save();
+
         $data = [
-            'username' => $request->username,
-            'serial' => $request->serial,
+            'pin' => $otp->pin,
         ];
 
         return view('otp.success')->with($data);
