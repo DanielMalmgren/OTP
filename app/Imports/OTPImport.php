@@ -4,8 +4,9 @@ namespace App\Imports;
 
 use App\Models\OTP;
 use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class OTPImport implements ToModel
+class OTPImport implements ToModel, WithMultipleSheets
 {
     /**
     * @param array $row
@@ -14,6 +15,7 @@ class OTPImport implements ToModel
     */
     public function model(array $row)
     {
+        logger(print_r($row, true));
         $serial = $row[0];
         $pin = sprintf("%04d", $row[1]);
         $puk = sprintf("%06d",$row[2]);
@@ -24,8 +26,10 @@ class OTPImport implements ToModel
         }
 
         $status = null;
-        if(isset($user) && $user != '') {
+        if(isset($user) && $user != '' && ctype_alpha(substr($user, 0, 1))) {
             $status = 'assigned';
+        } else {
+            $user = null;
         }
 
         return new OTP([
@@ -35,5 +39,12 @@ class OTPImport implements ToModel
             'status' => $status,
             'user'   => $user,
         ]);
+    }
+
+    public function sheets(): array
+    {
+        return [
+            0 => new OTPImport(),
+        ];
     }
 }
