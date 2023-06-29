@@ -21,6 +21,21 @@
                         Person: {{$name}}<br>
                         Serienummer: {{$serial}}<br><br>
 
+                        @isset($existingToken)
+                            OBS! Användaren har redan en OTP-dosa registrerad sedan innan.<br>
+                            Eftersom en användare enbart kan ha en dosa registrerad på sig<br>
+                            så kommer denna dosa att avregistreras ifrån användaren!<br>
+                            Serienummer på denna dosa: {{$existingToken->tokenId}}<br><br>
+                            <input type="hidden" name="existingTokenId" value="{{$existingToken->tokenId}}">
+                        @endisset
+
+                        @isset($existingUser)
+                            OBS! Denna dosa är redan registrerad på en annan användare.<br>
+                            Eftersom en dosa enbart kan vara registrerad på en användare<br>
+                            så kommer dosan att avregistreras ifrån den användaren!<br><br>
+                            <input type="hidden" name="existingUser" value="{{$existingUser}}">
+                        @endisset
+
                         <a href="/" class="btn btn-secondary">Avbryt</a>
                         <button class="btn btn-primary" type="submit">Bekräfta aktivering</button>
                     </form>

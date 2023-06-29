@@ -7,6 +7,15 @@ use RicorocksDigitalAgency\Soap\Facades\Soap;
 
 class XPIController extends Controller
 {
+    static private function auth() {
+        $usernamenode = ['key'=>'username','value'=>env("XPI_USERNAME")];
+        $passwordnode = ['key'=>'password','value'=>env("XPI_PASSWORD")];
+        $subject = ['credentials' => [$usernamenode, $passwordnode]];
+
+        return Soap::to(env("XPI_BASEURL").'Authentication?wsdl')->
+                call('authenticate', ['subject' => $subject, 'method' => env("XPI_AUTHMETHOD")])->response->return;
+    }
+
     static public function ActivateOtp(String $username, String $serial) {
         $user = session()->get('user');
 
@@ -18,12 +27,7 @@ class XPIController extends Controller
 
         logger($opuser." is adding OTP device ".$serial." to user ".$username.".");
 
-        $usernamenode = ['key'=>'username','value'=>env("XPI_USERNAME")];
-        $passwordnode = ['key'=>'password','value'=>env("XPI_PASSWORD")];
-        $subject = ['credentials' => [$usernamenode, $passwordnode]];
-
-        $subject = Soap::to(env("XPI_BASEURL").'Authentication?wsdl')->
-                call('authenticate', ['subject' => $subject, 'method' => env("XPI_AUTHMETHOD")])->response->return;
+        $subject = self::auth();
 
         $oathproviders = Soap::to(env("XPI_BASEURL").'OATH?wsdl')->
                 call('getProviders', ['subject' => $subject])->response->return;
@@ -57,6 +61,25 @@ class XPIController extends Controller
                 call('updateOATHProperties', ['subject' => $subject, 'oathProperties' => $oathproperties]);
     }
 
+    static public function GetUserOtp(String $username) {
+        $subject = self::auth();
+
+        $oathproperties = Soap::to(env("XPI_BASEURL").'OATH?wsdl')->
+                call('getOATHProperties', ['subject' => $subject, 'username' => $username])->response->return;
+
+        if(isset($oathproperties->oathTokens) && is_object($oathproperties->oathTokens)) {
+            if($oathproperties->oathTokens->provider->name == env("XPI_OATHPROVIDERNAME")) {
+                return $oathproperties->oathTokens;
+            }
+        } elseif (is_array($oathproperties->oathTokens)) {
+            foreach($oathproperties->oathTokens as $token) {
+                if($token->provider->name == env("XPI_OATHPROVIDERNAME")) {
+                    return $token;
+                }
+            }
+        }
+    }
+
     static public function DeactivateOtp(String $username, String $serial) {
         $user = session()->get('user');
 
@@ -68,21 +91,22 @@ class XPIController extends Controller
 
         logger($opuser." is removing OTP device ".$serial." from user ".$username.".");
 
-        $usernamenode = ['key'=>'username','value'=>env("XPI_USERNAME")];
-        $passwordnode = ['key'=>'password','value'=>env("XPI_PASSWORD")];
-        $subject = ['credentials' => [$usernamenode, $passwordnode]];
-
-        $subject = Soap::to(env("XPI_BASEURL").'Authentication?wsdl')->
-                call('authenticate', ['subject' => $subject, 'method' => env("XPI_AUTHMETHOD")])->response->return;
+        $subject = self::auth();
 
         $oathproperties = Soap::to(env("XPI_BASEURL").'OATH?wsdl')->
                 call('getOATHProperties', ['subject' => $subject, 'username' => $username])->response->return;
 
-        foreach($oathproperties->oathTokens as $key => $token) {
-            if($token->tokenId == $serial) {
-                unset($oathproperties->oathTokens[$key]);
-                break;
+        if(isset($oathproperties->oathTokens) && is_object($oathproperties->oathTokens)) {
+            $oathproperties->oathTokens = null;
+        } elseif (is_array($oathproperties->oathTokens)) {
+            foreach($oathproperties->oathTokens as $key => $token) {
+                if($token->tokenId == $serial) {
+                    unset($oathproperties->oathTokens[$key]);
+                    break;
+                }
             }
+            //Renumber the array keys, if they doesn't start at zero the SOAP call doesn't work
+            $oathproperties->oathTokens = array_combine(range(0, count($oathproperties->oathTokens)-1), array_values($oathproperties->oathTokens));
         }
 
         Soap::to(env("XPI_BASEURL").'OATH?wsdl')->

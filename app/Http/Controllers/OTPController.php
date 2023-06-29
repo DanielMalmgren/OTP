@@ -41,6 +41,8 @@ class OTPController extends Controller
             'name' => $aduser->displayname[0],
             'username' => $request->username,
             'serial' => $request->serial,
+            'existingToken' => XPIController::GetUserOtp($request->username),
+            'existingUser' => OTP::where('serial', $request->serial)->first()->user,
         ];
 
         return view('otp.confirm')->with($data);
@@ -48,6 +50,18 @@ class OTPController extends Controller
 
     public function confirm(Request $request)
     {
+        if(isset($request->existingTokenId)) {
+            XPIController::DeactivateOtp($request->username, $request->existingTokenId);
+            $otp = OTP::where('serial', $request->existingTokenId)->first();
+            $otp->status = null;
+            $otp->user = null;
+            $otp->save();
+        }
+
+        if(isset($request->existingUser)) {
+            XPIController::DeactivateOtp($request->existingUser, $request->serial);
+        }
+
         try {
             XPIController::ActivateOtp($request->username, $request->serial);
         } catch(\Exception $e) {
