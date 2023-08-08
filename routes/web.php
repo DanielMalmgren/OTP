@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Route;
 //Auth::routes();
 
 Route::get('/',                             'HomeController@index');
+Route::get('logout',                        'HomeController@logout');
 
 Route::post('/otp/activate',                'OTPController@activate');
 Route::post('/otp/confirm',                 'OTPController@confirm');
+Route::post('/otp/check',                   'OTPController@check');

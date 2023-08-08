@@ -84,4 +84,44 @@ class OTPController extends Controller
 
         return view('otp.success')->with($data);
     }
+
+    public function check(Request $request)
+    {
+        $this->validate($request, [
+            'username' => 'required',
+        ],
+        [
+            'username.required' => 'Du måste ange ett användarnamn!',
+        ]);
+
+        $user = session()->get('user');
+
+        if(!$user->isAdmin) {
+            abort(403);
+        }
+
+        $aduser = \LdapRecord\Models\ActiveDirectory\User::where('sAMAccountName', $request->username)->first();
+
+        if(is_null($aduser)) {
+            $data = [
+                'error' => "Felaktigt användarnamn",
+            ];
+
+            return view('otp.failure')->with($data);
+        }
+
+        $token = XPIController::GetUserOtp($request->username);
+        if($token) {
+            $otp = OTP::where('serial', $token->tokenId)->first();
+        } else {
+            $otp = null;
+        }
+
+        $data = [
+            'name' => $aduser->displayname[0],
+            'otp' => $otp,
+        ];
+
+        return view('otp.check')->with($data);
+    }
 }
