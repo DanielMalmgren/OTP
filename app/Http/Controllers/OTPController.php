@@ -37,12 +37,18 @@ class OTPController extends Controller
             return view('otp.failure')->with($data);
         }
 
+        $existingUser = OTP::where('serial', $request->serial)->first()->user;
+        //Only show this token as belonging to another user if that user actually exists in AD
+        if(!\LdapRecord\Models\ActiveDirectory\User::where('sAMAccountName', $existingUser)->first()) {
+            $existingUser = null;
+        }
+
         $data = [
             'name' => $aduser->displayname[0],
             'username' => $request->username,
             'serial' => $request->serial,
             'existingToken' => XPIController::GetUserOtp($request->username),
-            'existingUser' => OTP::where('serial', $request->serial)->first()->user,
+            'existingUser' => $existingUser,
         ];
 
         return view('otp.confirm')->with($data);
