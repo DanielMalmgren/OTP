@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use App\Models\OTP;
 
 class OTPController extends Controller
@@ -12,12 +13,11 @@ class OTPController extends Controller
         $this->middleware('authnodb');
     }
 
-    public function activate(Request $request)
+    public function activate(Request $request): View
     {
         $this->validate($request, [
             'username' => 'required',
-            'serial' => 'required',
-            'serial' => 'exists:otp,serial',
+            'serial' => 'required|exists:otp,serial',
         ],
         [
             'username.required' => 'Du måste ange ett användarnamn!',
@@ -54,7 +54,7 @@ class OTPController extends Controller
         return view('otp.confirm')->with($data);
     }
 
-    public function confirm(Request $request)
+    public function confirm(Request $request): View
     {
         if(isset($request->existingTokenId)) {
             XPIController::DeactivateOtp($request->username, $request->existingTokenId);
@@ -71,7 +71,8 @@ class OTPController extends Controller
         try {
             XPIController::ActivateOtp($request->username, $request->serial);
         } catch(\Exception $e) {
-            logger($user.name.' caught exception: '.$e->getMessage());
+            $user = session()->get('user');
+            logger($user->name.' caught exception: '.$e->getMessage());
             $data = [
                 'error' => $e->getMessage(),
             ];
@@ -91,7 +92,7 @@ class OTPController extends Controller
         return view('otp.success')->with($data);
     }
 
-    public function check(Request $request)
+    public function check(Request $request): View
     {
         $this->validate($request, [
             'username' => 'required',

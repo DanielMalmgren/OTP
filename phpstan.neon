@@ -1,0 +1,20 @@
+includes:
+    - ./vendor/nunomaduro/larastan/extension.neon
+
+parameters:
+
+    paths:
+        - app/
+
+    # Level 9 is the highest level
+    level: 7
+
+    ignoreErrors:
+        - '#Access to an undefined property LdapRecord\\Models\\Model::\$[a-zA-Z0-9::a-zA-Z]#'
+        - '#Call to an undefined method LdapRecord\\Models\\Model::[a-zA-Z0-9::a-zA-Z()]#'
+        - '#PHPDoc type array of property [a-zA-Z0-9::a-zA-Z()\$<>]#'
+#
+#    excludePaths:
+#        - ./*/*/FileToBeExcluded.php
+#
+#    checkMissingIterableValueType: false

@@ -9,13 +9,12 @@ use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 class OTPImport implements ToModel, WithMultipleSheets
 {
     /**
-    * @param array $row
+    * @param array<String> $row
     *
     * @return \Illuminate\Database\Eloquent\Model|null
     */
     public function model(array $row)
     {
-        logger(print_r($row, true));
         $serial = $row[0];
         $pin = sprintf("%04d", $row[1]);
         $puk = sprintf("%06d",$row[2]);
@@ -26,7 +25,7 @@ class OTPImport implements ToModel, WithMultipleSheets
         }
 
         $status = null;
-        if(isset($user) && $user != '' && ctype_alpha(substr($user, 0, 1))) {
+        if($user != '' && ctype_alpha(substr($user, 0, 1))) {
             $status = 'assigned';
         } else {
             $user = null;
@@ -41,6 +40,9 @@ class OTPImport implements ToModel, WithMultipleSheets
         ]);
     }
 
+    /**
+    * @return array<OTPImport>
+    */
     public function sheets(): array
     {
         return [

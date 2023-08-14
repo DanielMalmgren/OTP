@@ -24,7 +24,7 @@ class OtpDeactivate extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         XPIController::DeactivateOtp($this->argument('username'), $this->argument('serial'));
     }

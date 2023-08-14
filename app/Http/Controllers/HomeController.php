@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use App\Models\User;
 
 class HomeController extends Controller
@@ -17,7 +18,7 @@ class HomeController extends Controller
         $this->middleware('authnodb');
     }
 
-    private function getUser(Request $request)
+    private function getUser(Request $request): User
     {
         $user = session()->get('user');
         if($user->isAdmin && $request->username !== null) {
@@ -46,7 +47,7 @@ class HomeController extends Controller
         return view('home')->with($data);
     }
 
-    public function logout()
+    public function logout(): View
     {
         session()->flush();
         return view('logout');

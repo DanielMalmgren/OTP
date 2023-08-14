@@ -24,7 +24,7 @@ class GetUserOtp extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $token = XPIController::GetUserOtp($this->argument('username'));
 

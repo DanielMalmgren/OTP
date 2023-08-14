@@ -4,13 +4,9 @@ namespace App\Models;
 
 class User
 {
-    public $name;
-    public $username;
-    public $title;
-    public $organization;
-    public $organizations;
-    public $personid;
-    public $isAdmin;
+    public String $name;
+    public String $username;
+    public Bool $isAdmin;
 
     public function __construct(String $username)
     {
@@ -21,7 +17,6 @@ class User
         if(isset($aduser)) {
             $this->name = $aduser->displayName[0];
 
-            $this->personid = $aduser->employeeID[0];
             $this->isAdmin = $aduser->groups()->recursive()->exists($adgroup);
         }
     }

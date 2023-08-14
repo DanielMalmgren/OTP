@@ -7,7 +7,7 @@ use RicorocksDigitalAgency\Soap\Facades\Soap;
 
 class XPIController extends Controller
 {
-    static private function auth() {
+    static private function auth(): \stdClass {
         $usernamenode = ['key'=>'username','value'=>env("XPI_USERNAME")];
         $passwordnode = ['key'=>'password','value'=>env("XPI_PASSWORD")];
         $subject = ['credentials' => [$usernamenode, $passwordnode]];
@@ -16,7 +16,7 @@ class XPIController extends Controller
                 call('authenticate', ['subject' => $subject, 'method' => env("XPI_AUTHMETHOD")])->response->return;
     }
 
-    static public function ActivateOtp(String $username, String $serial) {
+    static public function ActivateOtp(String $username, String $serial): void {
         $user = session()->get('user');
 
         if($user) {
@@ -37,6 +37,10 @@ class XPIController extends Controller
                 $provider = $curprovider;
                 break;
             }
+        }
+
+        if(!isset($provider)) {
+            abort(500);
         }
 
         $oathproperties = Soap::to(env("XPI_BASEURL").'OATH?wsdl')->
@@ -61,14 +65,14 @@ class XPIController extends Controller
                 call('updateOATHProperties', ['subject' => $subject, 'oathProperties' => $oathproperties]);
     }
 
-    static public function GetUserOtp(String $username) {
+    static public function GetUserOtp(String $username): \stdClass|null {
         $subject = self::auth();
 
         $oathproperties = Soap::to(env("XPI_BASEURL").'OATH?wsdl')->
                 call('getOATHProperties', ['subject' => $subject, 'username' => $username])->response->return;
 
         if(isset($oathproperties->oathTokens)) {
-            if(is_object($oathproperties->oathTokens)) {
+            if($oathproperties->oathTokens instanceof \stdClass) {
                 if($oathproperties->oathTokens->provider->name == env("XPI_OATHPROVIDERNAME")) {
                     return $oathproperties->oathTokens;
                 }
@@ -80,9 +84,11 @@ class XPIController extends Controller
                 }
             }
         }
+
+        return null;
     }
 
-    static public function DeactivateOtp(String $username, String $serial) {
+    static public function DeactivateOtp(String $username, String $serial): void {
         $user = session()->get('user');
 
         if($user) {
